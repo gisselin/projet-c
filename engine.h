@@ -1,3 +1,10 @@
+#include <stdbool.h>
+#define SIZE 70
+#define SIZE2 44
+#define NB_MARIOS 22
+#define MARIO_DX 2
+#define MARIO_DY 2
+/* Fenetre de jeu */
 /* Liste des tuiles du jeu, correspondant pour la plupart a des images */
 enum {
   EMPTY=0,
@@ -11,7 +18,9 @@ enum {
   WATER,
   GROUND,
   BRICK,
-  BONUS,
+  BONUS1,
+  BONUS2,
+  DOOR,
   NTILES
   
 };
@@ -22,12 +31,22 @@ enum {
   RIGHT
 };
 
+
+
+
+typedef struct {
+	int mario_x,mario_y,mario_w,mario_h,mario_dx,mario_dy, mario_xpix, mario_ypix;
+	bool alive;
+} mario_t;
+
 typedef struct {
   int w,h,view;
-  char **t;
+  char *t;
   float pos;
   char dir;
+  mario_t* player;
 } level_t;
+
 
 
 void update(level_t *m);

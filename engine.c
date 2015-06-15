@@ -9,12 +9,21 @@
 level_t *loadLevel(char *filename) {
   level_t *m;
   m = malloc(sizeof(level_t));	//Allocation
+  m->player = malloc(sizeof(mario_t));
+  
+  m->player[0].mario_w=SIZE2;
+  m->player[0].mario_h=SIZE;
+  m->player[0].mario_dx=MARIO_DX;
+  m->player[0].mario_dy=MARIO_DY;
+  
   
   int w, h, view;
-  m->pos=0;
+  m->pos = 0;
   //Ouverture, affichage et fermeture du fichier
   
-  FILE* f = fopen(filename, "r"); 
+  FILE* f = fopen(filename, "r");
+  char buffer[1024];
+   
   if (f != NULL)
   {
 	  fscanf(f, "%d %d %d", &h, &w, &view);
@@ -24,62 +33,39 @@ level_t *loadLevel(char *filename) {
 		m->view = view;
 		
 //Allocation du tableau vide de taille h*w	  
-	  m->t = malloc(sizeof(int*)*h);
+	  m->t =  (char *)calloc(sizeof(char),m->w*m->h);
 	  int i,j;
-	  for (i = 0; i < h; i++)
-	  {
-		  m->t[i] = malloc(sizeof(int*)*w);
-	  }
 	  
 //On remplit le tableau avec les éléments du niveau	  	  
-	  for (i = 0; i < h; i++)
+	  for (i = 0; i < m->h; i++)
 	  { 
-		  for (j = 0; j < w; j++)
+		  memset(buffer,0,1024);
+		  fgets(buffer,1024,f);
+		  for (j = 0; j < m->w; j++)
 		  {
-			char c;
-			fscanf(f, "%c", &c);
-			switch (c)
-			{
-			  case '#': 
-				  m->t [i][j]=GROUND;
-				  break;
-			  case '(': 
-				  m->t [i][j]=BEGINGRASS;
-				  break;
-			  case ')': 
-				  m->t [i][j]=ENDGRASS;
-				  break;
-			  case '/': 
-				  m->t [i][j]=UPGRASS2;
-				  break;
-			  case '\\': 
-				  m->t [i][j]=DOWNGRASS1;
-				  break;
-			  case 'u': 
-				  m->t [i][j]=UPGRASS1;
-				  break;
-			  case 'd': 
-				  m->t [i][j]=DOWNGRASS2;
-				  break;
-			  case 'x': 
-				  m->t [i][j]=BRICK;
-				  break;
-			  case '+': 
-				  m->t [i][j]=BONUS;
-				  break;
-			  case ' ': 
-				  m->t [i][j]=EMPTY;
-				  break;	
-			  case '~': 
-				  m->t [i][j]=WATER;
-				  break;	  
-			  case '-': 
-				  m->t [i][j]=GRASS;
-				  break;
-			  default:
-				  break;
+			switch(buffer[j]) {
+			  case '~': m->t[m->w*i+j]= WATER; break;
+			  case '#': m->t[m->w*i+j]= GROUND; break;
+			  case '-': m->t[m->w*i+j]= GRASS; break;
+			  case '(': m->t[m->w*i+j]= BEGINGRASS; break;
+			  case ')': m->t[m->w*i+j]= ENDGRASS; break;
+			  case 'u': m->t[m->w*i+j]= UPGRASS1; break;
+			  case '/': m->t[m->w*i+j]= UPGRASS2; break;
+			  case '\\':m->t[m->w*i+j]= DOWNGRASS1; break;
+			  case 'd': m->t[m->w*i+j]= DOWNGRASS2; break;
+			  case 'x': m->t[m->w*i+j]= BRICK; break;
+			  case '?': m->t[m->w*i+j]= BONUS2; break;
+			  case '!': m->t[m->w*i+j]=BONUS1; break;
+			  case 'O': m->t[m->w*i+j]=DOOR; break;
+			  case '@': m->player[0].mario_x=j; m->player[0].mario_y=i; break;
+			  //~ case 'a': m->monsterA[m->nma].x=i; m->monsterA[m->nma].y=j; m->monsterA[m->nma++].alive=1; break;
+			  //~ case 'b': m->monsterB[m->nmb].x=i; m->monsterB[m->nmb].y=j; m->monsterB[m->nmb++].alive=1; break;
+			  //~ case 'c': m->monsterC[m->nmc].x=i; m->monsterC[m->nmc].y=j; m->monsterC[m->nmc++].alive=1; break;
+			  default: m->t[m->w*i+j]= EMPTY;
 			}
+			
 		  }	  
+		  
 	  }
 
 //Affichage dans le terminal avec des chiffres	  
@@ -87,7 +73,7 @@ level_t *loadLevel(char *filename) {
 	  {
 		  for (j = 0; j < w; j++)
 		  {
-			  printf("%d", m->t [i][j]);
+			  printf("%d ", m->t[m->w*i+j]);
 		  }
 		  printf("\n");
 	  }

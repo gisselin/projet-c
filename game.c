@@ -16,6 +16,8 @@ int main(int argc, char *argv[]) {
   }
   /* Charge les images des tuiles du jeu */
   loadSprites();
+  loadMario();
+  
   /* Charge le plateau de jeu */
   m=loadLevel(argv[1]);
   /* Ouvre la fenetre */
