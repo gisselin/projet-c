@@ -139,87 +139,27 @@ int getEvent(level_t *m) {
     /* On a appuyé sur une touche */
     if (event.type==SDL_KEYDOWN) {
       switch (event.key.keysym.sym) {
-		  //~ case SDLK_RIGHT : 
-			//~ m->pos++;
-			//~ break;
-		  //~ case SDLK_LEFT :
-			//~ if (m->pos > 1)
-			//~ {
-				//~ m->pos--;
-			//~ }
-			//~ break;
+		  
 		  case SDLK_RIGHT : 
-				actionsCases(m,SDLK_RIGHT);
+				m->player[0].dir = RIGHT;
 				break;
 		  case SDLK_LEFT :
-				actionsCases(m,SDLK_LEFT);		
+						
+				m->player[0].dir = LEFT;
 				break;
 		  case SDLK_ESCAPE :
 			return 1;
       default: ;
       }
-    } else if (event.type==SDL_KEYUP) {
+    } 
+    else if (event.type==SDL_KEYUP) {
+		m->player[0].dir = NONE;
     }
-    m->player[0].mario_y = (int)((m->player[0].mario_ypix/SIZE));
+    
   }
   return 0;
 }
 
-
-void depl(level_t*m, int direction)
-{
-	if (direction == SDLK_RIGHT)
-	{
-		if (m -> player[0].mario_xpix > m->view*SIZE*0.5 )
-		{
-			m->pos+= .2;
-		}
-			else
-		{
-			m->player[0].mario_xpix += m->player[0].mario_dx;
-		}
-			m->player[0].mario_x = (int)((m->player[0].mario_xpix/SIZE))+m->pos;
-	}
-	else if (direction = SDLK_LEFT)
-	{
-		m->player[0].mario_xpix -= m->player[0].mario_dx;
-		m->player[0].mario_x = (m->player[0].mario_xpix/SIZE);
-	}
-
-void actionsCases(level_t *m, int direction)
-{
-	if (m->t[m->w*m->player[0].mario_y+1+m->player[0].mario_x] == EMPTY
-	|| m->t[m->w*m->player[0].mario_y+1+m->player[0].mario_x] == GROUND
-	|| m->t[m->w*m->player[0].mario_y+1+m->player[0].mario_x] == WATER
-	|| m->t[m->w*m->player[0].mario_y+m->player[0].mario_x] == GROUND
-	|| m->t[m->w*m->player[0].mario_y+m->player[0].mario_x] == WATER)
-	{
-		m->player[0].mario_y ++;
-	}
-	else {
-		switch(m->t[m->w*m->player[0]->mario_y+1+m->player[0].mario_x])
-		{
-			case UPGRASS1 : 
-			break;
-			case UPGRASS2 :
-			break;
-			case GRASS :
-				depl(m, direction);
-			break;
-			case DOWNGRASS1 : 
-			break;
-			case DOWNGRASS2 :
-			break;
-			case BRICK :
-			break;
-			case BEGINGRASS :
-			break;
-			case ENDGRASS :
-			break;
-		}
-	}
-	
-}
 
 /* Ouvre une fenêtre avec de taille wxh tuiles de plateau de jeu. */ 
 void initWindow(int w,int h) {

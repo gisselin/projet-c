@@ -89,19 +89,68 @@ level_t *loadLevel(char *filename) {
  * Mise a jour du plateau: deplace les personnages
 */
 void update(level_t *m) {
-	//~ if (event.type==SDL_KEYDOWN) {
-		  //~ switch (event.key.keysym.sym) {
-			  //~ case SDLK_RIGHT : 
-				//~ m->player[0].x_pix += m->player[0].dx;
-				//~ break;
-			  //~ case SDLK_LEFT :
-				//~ m->player[0].x_pix -= m->player[0].dx;
-				//~ break;
-			  //~ case SDLK_ESCAPE :
-				//~ return 1;
-		  //~ default: ;
-		  //~ }
-		//~ } 
-	//~ else if (event.type==SDL_KEYUP) {
-		//~ }
+	
+	if (m->t[(m->w * (m->player[0].mario_y + 1)) + m->player[0].mario_x] == EMPTY
+	|| m->t[(m->w * (m->player[0].mario_y + 1))+m->player[0].mario_x] == GROUND
+	|| m->t[(m->w * (m->player[0].mario_y + 1))+m->player[0].mario_x] == WATER
+	)
+	{
+		m->player[0].mario_ypix ++;
+		printf("hello\n");
+	}
+	else {
+		printf("case en dessous: %d\n",m->t[(m->w * (m->player[0].mario_y + 1))+m->player[0].mario_x]);
+		switch(m->t[(m->w * (m->player[0].mario_y + 1))+m->player[0].mario_x])
+		{
+			case UPGRASS1 : 
+			break;
+			case UPGRASS2 :
+			break;
+			case GRASS :
+				printf("COUCOU\n");
+				depl(m);
+				break;
+			case DOWNGRASS1 : 
+			break;
+			case DOWNGRASS2 :
+			break;
+			case BRICK :
+				depl(m);
+				break;
+			case BEGINGRASS :
+				depl(m);
+			break;
+			case ENDGRASS :
+				depl(m);
+				break;
+			default:;
+		}
+	}
+	//Mise a jour du y  
+    m->player[0].mario_y = (int)((m->player[0].mario_ypix/SIZE));
+    printf("%d ",m->player[0].mario_y);
 }
+
+//Fonction déplacement horizontal
+void depl(level_t*m)
+{
+	if (m->player[0].dir == RIGHT)
+	{
+		if (m -> player[0].mario_xpix > m->view*SIZE*0.5 )
+		{
+			m->pos++;
+		}
+			else
+		{
+			m->player[0].mario_xpix += m->player[0].mario_dx;
+		}
+			m->player[0].mario_x = (int)((m->player[0].mario_xpix/SIZE))+m->pos;
+	}
+	else if (m->player[0].dir == RIGHT)
+	{
+		m->player[0].mario_xpix -= m->player[0].mario_dx;
+		m->player[0].mario_x = (m->player[0].mario_xpix/SIZE);
+	}
+	
+}
+

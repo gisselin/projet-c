@@ -36,6 +36,7 @@ enum {
 
 typedef struct {
 	int mario_x,mario_y,mario_w,mario_h,mario_dx,mario_dy, mario_xpix, mario_ypix;
+	  char dir;
 	bool alive;
 } mario_t;
 
@@ -43,7 +44,6 @@ typedef struct {
   int w,h,view;
   char *t;
   float pos;
-  char dir;
   mario_t* player;
 } level_t;
 
@@ -52,3 +52,5 @@ typedef struct {
 void update(level_t *m);
 level_t *loadLevel(char *filename);
 
+/* Fonction deplacement sur herbe et brique*/
+void depl(level_t*m);
