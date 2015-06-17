@@ -4,6 +4,7 @@
 #include <math.h>
 #include "engine.h"
 #include "graphics.h"
+
 /* Taille d'une image */
 
 SDL_Surface *screen=NULL;
@@ -148,21 +149,10 @@ int getEvent(level_t *m) {
 			//~ }
 			//~ break;
 		  case SDLK_RIGHT : 
-				
-				if (m -> player[0].mario_xpix > m->view*SIZE*0.5 )
-				{
-					m->pos+= .2;
-				}
-				else
-				{
-					m->player[0].mario_xpix += m->player[0].mario_dx;
-				}
-				m->player[0].mario_x = (int)((m->player[0].mario_xpix/SIZE))+m->pos;
-				
+				actionsCases(m,SDLK_RIGHT);
 				break;
 		  case SDLK_LEFT :
-				m->player[0].mario_xpix -= m->player[0].mario_dx;
-				m->player[0].mario_x = (m->player[0].mario_xpix/SIZE);
+				actionsCases(m,SDLK_LEFT);		
 				break;
 		  case SDLK_ESCAPE :
 			return 1;
@@ -173,6 +163,62 @@ int getEvent(level_t *m) {
     m->player[0].mario_y = (int)((m->player[0].mario_ypix/SIZE));
   }
   return 0;
+}
+
+
+void depl(level_t*m, int direction)
+{
+	if (direction == SDLK_RIGHT)
+	{
+		if (m -> player[0].mario_xpix > m->view*SIZE*0.5 )
+		{
+			m->pos+= .2;
+		}
+			else
+		{
+			m->player[0].mario_xpix += m->player[0].mario_dx;
+		}
+			m->player[0].mario_x = (int)((m->player[0].mario_xpix/SIZE))+m->pos;
+	}
+	else if (direction = SDLK_LEFT)
+	{
+		m->player[0].mario_xpix -= m->player[0].mario_dx;
+		m->player[0].mario_x = (m->player[0].mario_xpix/SIZE);
+	}
+
+void actionsCases(level_t *m, int direction)
+{
+	if (m->t[m->w*m->player[0].mario_y+1+m->player[0].mario_x] == EMPTY
+	|| m->t[m->w*m->player[0].mario_y+1+m->player[0].mario_x] == GROUND
+	|| m->t[m->w*m->player[0].mario_y+1+m->player[0].mario_x] == WATER
+	|| m->t[m->w*m->player[0].mario_y+m->player[0].mario_x] == GROUND
+	|| m->t[m->w*m->player[0].mario_y+m->player[0].mario_x] == WATER)
+	{
+		m->player[0].mario_y ++;
+	}
+	else {
+		switch(m->t[m->w*m->player[0]->mario_y+1+m->player[0].mario_x])
+		{
+			case UPGRASS1 : 
+			break;
+			case UPGRASS2 :
+			break;
+			case GRASS :
+				depl(m, direction);
+			break;
+			case DOWNGRASS1 : 
+			break;
+			case DOWNGRASS2 :
+			break;
+			case BRICK :
+			break;
+			case BEGINGRASS :
+			break;
+			case ENDGRASS :
+			break;
+		}
+	}
+	
 }
 
 /* Ouvre une fenêtre avec de taille wxh tuiles de plateau de jeu. */ 

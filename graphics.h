@@ -7,3 +7,5 @@ void paint(level_t *l);
 void initWindow(int w,int h);
 /* Gere les pressions de touche clavier, et divers evenements */
 int getEvent(level_t *l) ;
+/*Fonction action case */
+void actionsCases(level_t *m);
