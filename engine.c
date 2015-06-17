@@ -15,8 +15,7 @@ level_t *loadLevel(char *filename) {
   m->player[0].mario_h=SIZE;
   m->player[0].mario_dx=MARIO_DX;
   m->player[0].mario_dy=MARIO_DY;
-  
-  
+
   int w, h, view;
   m->pos = 0;
   //Ouverture, affichage et fermeture du fichier
@@ -67,7 +66,9 @@ level_t *loadLevel(char *filename) {
 		  }	  
 		  
 	  }
-
+  m->player[0].mario_xpix = m->player[0].mario_x*m->player[0].mario_h;
+  m->player[0].mario_ypix = m->player[0].mario_y*m->player[0].mario_w+208;
+  
 //Affichage dans le terminal avec des chiffres	  
 	  for (i = 0; i < h; i++)
 	  {
@@ -84,8 +85,23 @@ level_t *loadLevel(char *filename) {
  
   return m;
 }
-/* Mise a jour du plateau: deplace les personnages
+/* 
+ * Mise a jour du plateau: deplace les personnages
 */
 void update(level_t *m) {
-
+	//~ if (event.type==SDL_KEYDOWN) {
+		  //~ switch (event.key.keysym.sym) {
+			  //~ case SDLK_RIGHT : 
+				//~ m->player[0].x_pix += m->player[0].dx;
+				//~ break;
+			  //~ case SDLK_LEFT :
+				//~ m->player[0].x_pix -= m->player[0].dx;
+				//~ break;
+			  //~ case SDLK_ESCAPE :
+				//~ return 1;
+		  //~ default: ;
+		  //~ }
+		//~ } 
+	//~ else if (event.type==SDL_KEYUP) {
+		//~ }
 }

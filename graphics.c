@@ -1,6 +1,7 @@
 #include <SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "engine.h"
 #include "graphics.h"
 /* Taille d'une image */
@@ -97,7 +98,7 @@ void paint(level_t *m) {
   
   for (i = 0; i < m->h; i++)
 	  {
-		  for (j = m->pos; j < (m->pos + m -> view); j++)
+		  for (j = m->pos; j < (m->pos + m -> view) ; j++)
 		  {
 			  SDL_Rect rect1;
 			  rect1.w = SIZE;
@@ -114,8 +115,8 @@ void paint(level_t *m) {
 	SDL_Rect mario;
 	mario.w = m->player[0].mario_w;
 	mario.h = m->player[0].mario_h;
-	mario.x = m->player[0].mario_x*m->player[0].mario_h;
-	mario.y = m->player[0].mario_y*m->player[0].mario_w+20;
+	mario.x = m->player[0].mario_xpix;
+	mario.y = m->player[0].mario_ypix;
 	SDL_BlitSurface(marios[1], NULL, screen, &mario);
 	
 	
@@ -137,21 +138,39 @@ int getEvent(level_t *m) {
     /* On a appuyé sur une touche */
     if (event.type==SDL_KEYDOWN) {
       switch (event.key.keysym.sym) {
+		  //~ case SDLK_RIGHT : 
+			//~ m->pos++;
+			//~ break;
+		  //~ case SDLK_LEFT :
+			//~ if (m->pos > 1)
+			//~ {
+				//~ m->pos--;
+			//~ }
+			//~ break;
 		  case SDLK_RIGHT : 
-			m->pos++;
-			break;
+				
+				if (m -> player[0].mario_xpix > m->view*SIZE*0.5 )
+				{
+					m->pos++;
+				}
+				else
+				{
+					m->player[0].mario_xpix += m->player[0].mario_dx;
+				}
+				m->player[0].mario_x = (int)((m->player[0].mario_xpix/SIZE))+m->pos;
+				
+				break;
 		  case SDLK_LEFT :
-			if (m->pos > 1)
-			{
-				m->pos--;
-			}
-			break;
+				m->player[0].mario_xpix -= m->player[0].mario_dx;
+				m->player[0].mario_x = (int)(m->player[0].mario_xpix/SIZE);
+				break;
 		  case SDLK_ESCAPE :
 			return 1;
       default: ;
       }
     } else if (event.type==SDL_KEYUP) {
     }
+    m->player[0].mario_y = (int)((m->player[0].mario_ypix/SIZE));
   }
   return 0;
 }
@@ -173,4 +192,4 @@ void initWindow(int w,int h) {
 /*Il faut comparer le tableau qui contient les coordonnées de mario avec 
  * le tableau qui contient les coordonnées du décor et regarder ce qu'il 
  * y a dans la case sous mario pour voir si il tombe.
- * Il faut aussi dire qu'on ne peut déplacer mario que dans un rectangle EMPTY
+ * Il faut aussi dire qu'on ne peut déplacer mario que dans un rectangle EMPTY*/
