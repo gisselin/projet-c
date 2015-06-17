@@ -151,7 +151,7 @@ int getEvent(level_t *m) {
 				
 				if (m -> player[0].mario_xpix > m->view*SIZE*0.5 )
 				{
-					m->pos++;
+					m->pos+= .2;
 				}
 				else
 				{
@@ -162,7 +162,7 @@ int getEvent(level_t *m) {
 				break;
 		  case SDLK_LEFT :
 				m->player[0].mario_xpix -= m->player[0].mario_dx;
-				m->player[0].mario_x = (int)(m->player[0].mario_xpix/SIZE);
+				m->player[0].mario_x = (m->player[0].mario_xpix/SIZE);
 				break;
 		  case SDLK_ESCAPE :
 			return 1;

@@ -2,7 +2,7 @@
 #define SIZE 70
 #define SIZE2 44
 #define NB_MARIOS 22
-#define MARIO_DX 30
+#define MARIO_DX .2*SIZE
 #define MARIO_DY SIZE
 /* Fenetre de jeu */
 /* Liste des tuiles du jeu, correspondant pour la plupart a des images */
