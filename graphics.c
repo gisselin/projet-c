@@ -1,4 +1,6 @@
 #include <SDL.h>
+#include <SDL_ttf.h>
+#include <SDL_mixer.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -8,6 +10,17 @@
 /* Taille d'une image */
 
 SDL_Surface *screen=NULL;
+SDL_Surface *score_affichage=NULL;
+SDL_Surface *bonus_affichage=NULL;
+//The music that will be played
+Mix_Music *music = NULL;
+//The sound effects that will be used
+Mix_Chunk *tralala = NULL;
+Mix_Chunk *dingdingdong = NULL;
+//The color of the font
+SDL_Color textColor = { 255, 255, 255 };
+SDL_Color textBonusColor = { 0, 255, 0 };
+TTF_Font *font = NULL;
 /* Tableau des images */
 SDL_Surface *sprite[NTILES];
 SDL_Surface *marios[NB_MARIOS];
@@ -43,6 +56,19 @@ int getsprite(n) {
   }
 }
 #define MARIO "data/marios.bmp"
+void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip)
+{
+    //Holds offsets
+    SDL_Rect offset;
+
+    //Get offsets
+    offset.x = x;
+    offset.y = y;
+
+    //Blit
+    SDL_BlitSurface( source, clip, destination, &offset );
+}
+
 void loadMario() {
   int i;
   /* Charge les sprites */
@@ -80,6 +106,7 @@ void loadSprites() {
 	srcRect.h = SIZE;
 	dstRect.x = 0;
 	dstRect.y = 0;
+	//SDL_SetColorKey(sprite[k], SDL_SRCCOLORKEY, SDL_MapRGB(screen->format,0,0,0));
 	SDL_BlitSurface(tileset, &srcRect, sprite[k], &dstRect);
       }
     }
@@ -137,12 +164,73 @@ void paint(level_t *m) {
 	SDL_SetColorKey(marios[courir], SDL_SRCCOLORKEY, SDL_MapRGB(screen->format,0,0,0));
 	SDL_BlitSurface(marios[courir], NULL, screen, &mario);
 	
+	//Render the text
+	char score_string[1000];
+	sprintf(score_string, "%d", m->score);
+    score_affichage = TTF_RenderText_Solid( font, score_string, textColor );
+	//Show the message on the screen
+    apply_surface( 20, 20, score_affichage, screen,NULL );
+
+    //Free the message
+    SDL_FreeSurface( score_affichage );
+    
+    char bonus_string[1000];
+
+	sprintf(bonus_string, "Bonus Kill : %d", m->player[0].nb_kill);
 	
-	
+    bonus_affichage = TTF_RenderText_Solid( font, bonus_string, textBonusColor );
+	//Show the message on the screen
+    apply_surface( 20, 80, bonus_affichage, screen,NULL );
+
+    //Free the message
+    SDL_FreeSurface( bonus_affichage );
   /* Met a jour la fenetre */
   SDL_Flip(screen);
 }
-
+void playKillSound()
+{
+	//Play the medium hit effect
+                    if( Mix_PlayChannel( -1, tralala, 0 ) == -1 )
+                    {
+                        return ;
+                    }
+}
+void playBonusSound()
+{
+	//Play the medium hit effect
+                    if( Mix_PlayChannel( -1, dingdingdong, 0 ) == -1 )
+                    {
+                        return ;
+                    }
+}
+void toggleMusic()
+{
+//If there is no music playing
+                    if( Mix_PlayingMusic() == 0 )
+                    {
+                        //Play the music
+                        if( Mix_PlayMusic( music, -1 ) == -1 )
+                        {
+                            return;
+                        }
+                    }
+                    //If music is being played
+                    else
+                    {
+                        //If the music is paused
+                        if( Mix_PausedMusic() == 1 )
+                        {
+                            //Resume the music
+                            Mix_ResumeMusic();
+                        }
+                        //If the music is playing
+                        else
+                        {
+                            //Pause the music
+                            Mix_PauseMusic();
+                        }
+                    }
+                    }
 /* Capture les evenements clavier/fenetre */
 /* Retourne 1 si il faut quitter le jeu, 0 sinon.*/
 /* A REMPLIR */
@@ -173,6 +261,11 @@ int getEvent(level_t *m) {
 		  case SDLK_SPACE :
 				mario_KillMonstersBonus2(m);
 				break;
+		case SDLK_a :
+                
+                toggleMusic();
+                break;
+
 		  case SDLK_ESCAPE :
 			return 1;
       default: ;
@@ -193,9 +286,24 @@ void initWindow(int w,int h) {
     fprintf(stderr,"error %s\n",SDL_GetError());
     exit(1);
   }
+  //Initialize SDL_ttf
+    TTF_Init();
+    //Initialize SDL_mixer
+    Mix_OpenAudio( 22050, MIX_DEFAULT_FORMAT, 2, 4096 );
+
+
+
   atexit(SDL_Quit);
+  atexit(TTF_Quit);
   fprintf(stderr,"size %d %d\n",w*SIZE,h*SIZE);
+  //Load the music
+   music = Mix_LoadMUS( "data/gunther.wav" );
+   //Load the sound effects
+    tralala = Mix_LoadWAV( "data/tralala.wav" );
+   dingdingdong = Mix_LoadWAV( "data/dingdingdong.wav" );
+  font = TTF_OpenFont( "data/impact.ttf", 64 );
   screen = SDL_SetVideoMode(w*SIZE,h*SIZE,32,SDL_SWSURFACE|SDL_DOUBLEBUF);
+  toggleMusic();
   if (screen== NULL) {
     fprintf(stderr,"error video mode: %s\n", SDL_GetError()) ;
     exit(1);

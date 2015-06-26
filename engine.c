@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "engine.h"
-
+#include "graphics.h"
 /* Charge le plateau de jeu. Prend un nom de fichier en parametre, retourne un 
   pointeur sur une structure level definie dans engine.h
 */
@@ -93,15 +93,11 @@ level_t *loadLevel(char *filename) {
 */
 void update(level_t *m) {
 	
-	//Déplacement des monstres
-	if (m->deplacement_monstres % 5 == 0)
-	{
-		deplMonstre(m);
-	}
+	
 	//Gestion du "temps" score
 	m->score++;
 	
-	m->deplacement_monstres++;
+	
 	
 	// le personnage tombe
 	if (m->t[m->w*(m->player[0].mario_y + 1)+m->player[0].mario_x] == EMPTY){
@@ -110,10 +106,12 @@ void update(level_t *m) {
 	if (m->t[m->w*(m->player[0].mario_y + 1)+m->player[0].mario_x] == GROUND) {
 		m->player[0].mario_y++;
 	}
-	if (m->t[m->w*(m->player[0].mario_y + 1)+m->player[0].mario_x] == MONSTER_A
-	 || m->t[m->w*(m->player[0].mario_y + 1)+m->player[0].mario_x] == MONSTER_B
-	 || m->t[m->w*(m->player[0].mario_y + 1)+m->player[0].mario_x] == MONSTER_C) {
+	if ((m->t[m->w*(m->player[0].mario_y + 1)+m->player[0].mario_x] == MONSTER_A)
+	 ||(m->t[m->w*(m->player[0].mario_y + 1)+m->player[0].mario_x] == MONSTER_B)
+	 ||(m->t[m->w*(m->player[0].mario_y + 1)+m->player[0].mario_x] == MONSTER_C)) {
+		 
 		m->t[m->w*(m->player[0].mario_y + 1)+m->player[0].mario_x] = EMPTY;
+		playKillSound();
 	}
 	if (m->t[m->w*(m->player[0].mario_y + 1)+m->player[0].mario_x] == WATER){
 		m->player[0].mario_y++;
@@ -132,10 +130,12 @@ void update(level_t *m) {
 	}
 	if (m->t[m->w*(m->player[0].mario_y)+m->player[0].mario_x] == BONUS1){
 		m->t[m->w*(m->player[0].mario_y)+m->player[0].mario_x] = EMPTY;
+		playBonusSound();
 		m->score *= 0.75;
 	}
 	if (m->t[m->w*(m->player[0].mario_y)+m->player[0].mario_x] == BONUS2){
 		m->t[m->w*(m->player[0].mario_y)+m->player[0].mario_x] = EMPTY;
+		playBonusSound();
 		m->player[0].nb_kill++;
 	}
 	//Deplacement mario gauche droite
@@ -164,6 +164,13 @@ void update(level_t *m) {
 				break;
 			default:;
 		}
+		
+		//Déplacement des monstres
+	if (m->deplacement_monstres % 5 == 0)
+	{
+		deplMonstre(m);
+	}
+	m->deplacement_monstres++;
 }
 
 //Deplacement monstres
@@ -214,6 +221,7 @@ void mario_KillMonstersBonus2(level_t* m)
 		)
 		{
 			m->t[m->w*(m->player[0].mario_y)+m->player[0].mario_x+i] = EMPTY;
+			playKillSound();
 			m->player[0].nb_kill--;
 			break;
 		}

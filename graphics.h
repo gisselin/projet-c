@@ -8,4 +8,7 @@ void initWindow(int w,int h);
 /* Gere les pressions de touche clavier, et divers evenements */
 int getEvent(level_t *l) ;
 
+void playKillSound();
+void playBonusSound();
+
 

@@ -10,7 +10,7 @@ LDFLAGS=`sdl-config --libs`
 #LDFLAGS= -framework SDL -framework Cocoa -framework OpenGL
 
 mario: game.o engine.o graphics.o timer.o
-	gcc -Wall -o $@  $^ ${LDFLAGS}
+	gcc -Wall -o $@  $^ ${LDFLAGS} -lSDL_ttf -lSDL_mixer
 game.o: game.c engine.h
 	gcc -c ${CFLAGS} $<
 timer.o: timer.c
