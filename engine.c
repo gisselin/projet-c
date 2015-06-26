@@ -8,13 +8,18 @@
 */
 level_t *loadLevel(char *filename) {
   level_t *m;
+
   m = malloc(sizeof(level_t));	//Allocation
   m->player = malloc(sizeof(mario_t));
-  
+
   m->player[0].mario_w=SIZE2;
   m->player[0].mario_h=SIZE;
-  m->player[0].mario_dx=MARIO_DX;
-  m->player[0].mario_dy=MARIO_DY;
+
+  m->score=0;
+  m->deplacement_monstres = 0;
+  
+  m->player[0].nb_kill = 0;
+  m->tocard = false;
 
   int w, h, view;
   m->pos = 0;
@@ -57,17 +62,16 @@ level_t *loadLevel(char *filename) {
 			  case '!': m->t[m->w*i+j]=BONUS1; break;
 			  case 'O': m->t[m->w*i+j]=DOOR; break;
 			  case '@': m->player[0].mario_x=j; m->player[0].mario_y=i; break;
-			  //~ case 'a': m->monsterA[m->nma].x=i; m->monsterA[m->nma].y=j; m->monsterA[m->nma++].alive=1; break;
-			  //~ case 'b': m->monsterB[m->nmb].x=i; m->monsterB[m->nmb].y=j; m->monsterB[m->nmb++].alive=1; break;
-			  //~ case 'c': m->monsterC[m->nmc].x=i; m->monsterC[m->nmc].y=j; m->monsterC[m->nmc++].alive=1; break;
+			  case 'a': m->t[m->w*i+j]=MONSTER_A; break;
+			  case 'b': m->t[m->w*i+j]=MONSTER_B; break;
+			  case 'c': m->t[m->w*i+j]=MONSTER_C; break;
 			  default: m->t[m->w*i+j]= EMPTY;
 			}
 			
 		  }	  
 		  
 	  }
-  m->player[0].mario_xpix = m->player[0].mario_x*m->player[0].mario_h;
-  m->player[0].mario_ypix = m->player[0].mario_y*m->player[0].mario_w+208;
+
   
 //Affichage dans le terminal avec des chiffres	  
 	  for (i = 0; i < h; i++)
@@ -78,8 +82,7 @@ level_t *loadLevel(char *filename) {
 		  }
 		  printf("\n");
 	  }
-	  
-	  
+	   
 	  fclose(f);
   }
  
@@ -90,67 +93,149 @@ level_t *loadLevel(char *filename) {
 */
 void update(level_t *m) {
 	
-	if (m->t[(m->w * (m->player[0].mario_y + 1)) + m->player[0].mario_x] == EMPTY
-	|| m->t[(m->w * (m->player[0].mario_y + 1))+m->player[0].mario_x] == GROUND
-	|| m->t[(m->w * (m->player[0].mario_y + 1))+m->player[0].mario_x] == WATER
-	)
+	//Déplacement des monstres
+	if (m->deplacement_monstres % 5 == 0)
 	{
-		m->player[0].mario_ypix ++;
-		printf("hello\n");
+		deplMonstre(m);
 	}
-	else {
-		printf("case en dessous: %d\n",m->t[(m->w * (m->player[0].mario_y + 1))+m->player[0].mario_x]);
+	//Gestion du "temps" score
+	m->score++;
+	
+	m->deplacement_monstres++;
+	
+	// le personnage tombe
+	if (m->t[m->w*(m->player[0].mario_y + 1)+m->player[0].mario_x] == EMPTY){
+		m->player[0].mario_y++;
+	}	
+	if (m->t[m->w*(m->player[0].mario_y + 1)+m->player[0].mario_x] == GROUND) {
+		m->player[0].mario_y++;
+	}
+	if (m->t[m->w*(m->player[0].mario_y + 1)+m->player[0].mario_x] == MONSTER_A
+	 || m->t[m->w*(m->player[0].mario_y + 1)+m->player[0].mario_x] == MONSTER_B
+	 || m->t[m->w*(m->player[0].mario_y + 1)+m->player[0].mario_x] == MONSTER_C) {
+		m->t[m->w*(m->player[0].mario_y + 1)+m->player[0].mario_x] = EMPTY;
+	}
+	if (m->t[m->w*(m->player[0].mario_y + 1)+m->player[0].mario_x] == WATER){
+		m->player[0].mario_y++;
+		m->tocard = true;
+		quitterJeu(m);
+	}
+	if (m->t[m->w*(m->player[0].mario_y)+m->player[0].mario_x] == MONSTER_A
+	|| m->t[m->w*(m->player[0].mario_y)+m->player[0].mario_x] == MONSTER_B
+	|| m->t[m->w*(m->player[0].mario_y)+m->player[0].mario_x] == MONSTER_C){
+		m->tocard = true;
+		quitterJeu(m);
+	}
+	if (m->t[m->w*(m->player[0].mario_y)+m->player[0].mario_x] == DOOR){
+		m->tocard = false;
+		quitterJeu(m);
+	}
+	if (m->t[m->w*(m->player[0].mario_y)+m->player[0].mario_x] == BONUS1){
+		m->t[m->w*(m->player[0].mario_y)+m->player[0].mario_x] = EMPTY;
+		m->score *= 0.75;
+	}
+	if (m->t[m->w*(m->player[0].mario_y)+m->player[0].mario_x] == BONUS2){
+		m->t[m->w*(m->player[0].mario_y)+m->player[0].mario_x] = EMPTY;
+		m->player[0].nb_kill++;
+	}
+	//Deplacement mario gauche droite
+	if (m->player[0].dir == LEFT && m->pos > 0 ){
+		m -> pos --; 
+		m->player[0].mario_x--;
+		}
+	if (m->player[0].dir == RIGHT && m->pos < m->w ){
+		m -> pos ++; 
+		m->player[0].mario_x++;
+		}
+		
+		
 		switch(m->t[(m->w * (m->player[0].mario_y + 1))+m->player[0].mario_x])
 		{
 			case UPGRASS1 : 
-			break;
-			case UPGRASS2 :
-			break;
-			case GRASS :
-				printf("COUCOU\n");
-				depl(m);
+				m->player[0].mario_x ++;
+				m->player[0].mario_y --;
+				m -> pos ++;
 				break;
-			case DOWNGRASS1 : 
-			break;
 			case DOWNGRASS2 :
-			break;
-			case BRICK :
-				depl(m);
-				break;
-			case BEGINGRASS :
-				depl(m);
-			break;
-			case ENDGRASS :
-				depl(m);
+				if( m->player[0].dir == LEFT)
+				{
+					m->player[0].mario_y --;
+				}	
 				break;
 			default:;
 		}
-	}
-	//Mise a jour du y  
-    m->player[0].mario_y = (int)((m->player[0].mario_ypix/SIZE));
-    printf("%d ",m->player[0].mario_y);
 }
 
-//Fonction déplacement horizontal
-void depl(level_t*m)
+//Deplacement monstres
+void deplMonstre(level_t*m)
+{	
+	int i;
+	int j;
+	
+	  for (i = 0; i < m->h; i++)
+	  {
+		  for (j = m->pos; j < (m->pos + m -> view) ; j++)
+		  {
+				if (m->t[m->w*i+j] == MONSTER_A
+				||  m->t[m->w*i+j] == MONSTER_B
+				||  m->t[m->w*i+j] == MONSTER_C){
+					int deplacement = rand()%2;
+					if (deplacement == 0)
+					{
+						if (m->t[m->w*(i+1)+(j-1)] == GRASS && m->t[m->w*(i)+(j-1)] == EMPTY)
+						{
+							m->t[m->w*i+j-1] = m->t[m->w*i+j];
+							m->t[m->w*i+j] = EMPTY;
+						}
+					}
+					else
+					{
+						if (m->t[m->w*(i+1)+(j+1)] == GRASS && m->t[m->w*(i)+(j+1)] == EMPTY)
+						{
+							m->t[m->w*i+j+1] = m->t[m->w*i+j];
+							m->t[m->w*i+j] = EMPTY;
+						}
+					}						
+				}
+			}
+		}
+}
+
+void mario_KillMonstersBonus2(level_t* m)
 {
-	if (m->player[0].dir == RIGHT)
+	
+	int i;
+	for (i = 0; i < m->view; i++)
 	{
-		if (m -> player[0].mario_xpix > m->view*SIZE*0.5 )
+		if ((m->t[m->w*(m->player[0].mario_y)+m->player[0].mario_x+i] == MONSTER_A
+		|| m->t[m->w*(m->player[0].mario_y)+m->player[0].mario_x+i] == MONSTER_B
+		|| m->t[m->w*(m->player[0].mario_y)+m->player[0].mario_x+i] == MONSTER_C)
+		&& m->player[0].nb_kill > 0
+		)
 		{
-			m->pos++;
+			m->t[m->w*(m->player[0].mario_y)+m->player[0].mario_x+i] = EMPTY;
+			m->player[0].nb_kill--;
+			break;
 		}
-			else
+		else if (m->t[m->w*(m->player[0].mario_y)+m->player[0].mario_x+i] != EMPTY)
 		{
-			m->player[0].mario_xpix += m->player[0].mario_dx;
+			break;
 		}
-			m->player[0].mario_x = (int)((m->player[0].mario_xpix/SIZE))+m->pos;
-	}
-	else if (m->player[0].dir == RIGHT)
-	{
-		m->player[0].mario_xpix -= m->player[0].mario_dx;
-		m->player[0].mario_x = (m->player[0].mario_xpix/SIZE);
 	}
 	
 }
 
+void quitterJeu(level_t *m)
+{
+	if (m->tocard)
+	{
+		printf("TOCARD\n");
+	}
+	else
+	{
+		printf("GAGNE\n");
+	}
+	printf("NB KILL : %d\n", m->player[0].nb_kill);
+	printf("Score : %d\n", m->score);
+	exit(0);
+}

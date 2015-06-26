@@ -8,6 +8,10 @@
 /* Principale fonction du jeu. Ne fait qu'appeler les fonctions dans les 
    autres fichiers */
 int main(int argc, char *argv[]) {
+	
+  // Initialisation de la graine du rand;
+  srand(time(NULL));
+	
   level_t *m;
   int finished=0;
   if (argc<2) {

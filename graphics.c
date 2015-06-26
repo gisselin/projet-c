@@ -12,6 +12,11 @@ SDL_Surface *screen=NULL;
 SDL_Surface *sprite[NTILES];
 SDL_Surface *marios[NB_MARIOS];
 SDL_Surface *background;
+
+int courir;
+int monstre1;
+int monstre2;
+
 /* Tableau des noms de fichier d'images. Correspond aux numeros des images
    dans engine.h
 */
@@ -31,6 +36,9 @@ int getsprite(n) {
   case 0 : return BONUS1;
   case 5*13 : return BONUS2;
   case 1 : return DOOR;
+  case 13*13+8: return MONSTER_A;
+  case 13*13 : return MONSTER_B;
+  case 13*13+4: return MONSTER_C;
   default: return -1;
   }
 }
@@ -59,7 +67,7 @@ void loadSprites() {
   /* Charge les sprites */
   SDL_Surface *tileset=SDL_LoadBMP(TILESET);
   if (tileset==NULL) fprintf(stderr,"file %s cannot be found\n",TILESET);
-  for (i=0; i<13; i++) {
+  for (i=0; i<14; i++) {
     for (j=0; j<13; j++) {
       SDL_Rect srcRect,dstRect;
       int k=getsprite(i*13+j);
@@ -106,19 +114,28 @@ void paint(level_t *m) {
 			  rect1.h = SIZE;
 			  rect1.x = (j - m->pos) * SIZE;
 			  rect1.y = i*SIZE;
-			  //SDL_SetColorKey(sprite[m->t[m->w*i+j]],SDL_SRCCOLORKEY,SDL_MapRGB(screen->format,0,0,0));
+			  //SDL_SetColorKey(sprite[m->t[m->w*i+j]], SDL_SRCCOLORKEY, SDL_MapRGB(screen->format,0,0,0));
 			  SDL_BlitSurface(sprite[m->t[m->w*i+j]], NULL, screen, &rect1);
 			  
 		  }
 	  }
 	  
+	  
+	if (courir<20){
+		courir++;
+	}
+	else if (courir = 20){
+		courir = 0;
+	}
+	  
 /*On fait le placement du mario*/
 	SDL_Rect mario;
 	mario.w = m->player[0].mario_w;
 	mario.h = m->player[0].mario_h;
-	mario.x = m->player[0].mario_xpix;
-	mario.y = m->player[0].mario_ypix;
-	SDL_BlitSurface(marios[1], NULL, screen, &mario);
+	mario.x = SIZE*(m->player[0].mario_x-m->pos);
+	mario.y = SIZE*m->player[0].mario_y;
+	SDL_SetColorKey(marios[courir], SDL_SRCCOLORKEY, SDL_MapRGB(screen->format,0,0,0));
+	SDL_BlitSurface(marios[courir], NULL, screen, &mario);
 	
 	
 	
@@ -144,8 +161,17 @@ int getEvent(level_t *m) {
 				m->player[0].dir = RIGHT;
 				break;
 		  case SDLK_LEFT :
-						
 				m->player[0].dir = LEFT;
+				break;
+		  case SDLK_UP :
+				if (m->player[0].mario_y>3
+				&& m->t[m->w*(m->player[0].mario_y + 1)+m->player[0].mario_x] != EMPTY)
+				{
+					m->player[0].mario_y -= 4;
+				}
+				break;
+		  case SDLK_SPACE :
+				mario_KillMonstersBonus2(m);
 				break;
 		  case SDLK_ESCAPE :
 			return 1;
@@ -175,7 +201,4 @@ void initWindow(int w,int h) {
     exit(1);
   }
 }
-/*Il faut comparer le tableau qui contient les coordonnées de mario avec 
- * le tableau qui contient les coordonnées du décor et regarder ce qu'il 
- * y a dans la case sous mario pour voir si il tombe.
- * Il faut aussi dire qu'on ne peut déplacer mario que dans un rectangle EMPTY*/
+

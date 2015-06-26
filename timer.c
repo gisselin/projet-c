@@ -1,5 +1,5 @@
 #include <SDL.h>
-#define TICK_INTERVAL 5
+#define TICK_INTERVAL 150
 
 Uint32 next;
 
