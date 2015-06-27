@@ -1,2 +1,3 @@
 # projet-c
-Dépot de gestion de conf du projet de programmation en C.
+Projet MaRSIo - Sarah BAUDRIT - Guillaume ISSELIN.  
+Exécuter avec la commande "./mario m1-corrige.txt"
